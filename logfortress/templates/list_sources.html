@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Log Sources - LogFortress</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon2.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>LogFortress</h1>
+    <h2>Running Containers</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Image</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        {% for container in containers %}
+        <tr>
+            <td>{{ container.id[:12] }}</td>
+            <td>{{ container.name }}</td>
+            <td>{{ container.image.tags[0] if container.image.tags else "<no tag>" }}</td>
+            <td>{{ container.status }}</td>
+            <td><a href="{{ url_for('view_logs', container_id=container.id) }}">View Logs</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <h2>Custom Log Sources</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Image</th>
+            <th>Status</th>
+            <th>Log File Path</th>
+            <th>Actions</th>
+        </tr>
+        {% for source in custom_sources %}
+        <tr>
+            <td>{{ source.id }}</td>
+            <td>{{ source.name }}</td>
+            <td>{{ source.image }}</td>
+            <td>{{ source.status }}</td>
+            <td>{{ source.log_file_path }}</td>
+            <td><a href="{{ url_for('view_logs', container_id=source.name) }}">View Logs</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

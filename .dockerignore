@@ -1,0 +1,27 @@
+# Ignore Python cache and virtual environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+
+# Ignore version control directories
+.git/
+.gitignore
+
+# Ignore environment files
+.env
+
+# Ignore compiled files
+*.so
+*.o
+
+# Ignore other temporary files or directories
+*.log
+*.tmp
+node_modules/
+dist/
+
+# If you have specific directories to exclude
+# my_large_directory/
+# my_unused_script.py

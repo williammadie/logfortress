@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ container_name }} logs - LogFortress</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon2.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .container-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 80%;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .container-info div {
+            margin: 0 10px;
+        }
+    </style>
+    <script>
+        function startLogStream() {
+            const logContainer = document.getElementById('log-container');
+            const eventSource = new EventSource('{{ url_for("stream_logs", container_id=container_id) }}');
+
+            eventSource.onmessage = function(event) {
+                const newLog = document.createElement('div');
+                newLog.textContent = event.data;
+                logContainer.appendChild(newLog);
+                logContainer.scrollTop = logContainer.scrollHeight;
+            };
+        }
+
+        window.onload = startLogStream;
+    </script>
+</head>
+<body>
+    <h1>{{ container_name }}</h1>
+    <div class="container-info">
+        <div><strong>Name:</strong> {{ container_name }}</div>
+        <div><strong>ID:</strong> {{ container_id }}</div>
+        <div><strong>Status:</strong> {{ container_status }}</div>
+        <div><strong>Image:</strong> {{ image_tag }}</div>
+    </div>
+    <div id="log-container"></div>
+    <button onclick="window.location.href='{{ url_for("list_sources") }}'">⬅️ Back to Listing</button>
+</body>
+</html>

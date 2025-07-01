@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Log Sources - LogFortress</title>
-    <link rel="icon" href="{{ url_for('static', filename='favicon2.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
@@ -22,7 +22,7 @@
             <td>{{ container.id[:12] }}</td>
             <td>{{ container.name }}</td>
             <td>{{ container.image.tags[0] if container.image.tags else "<no tag>" }}</td>
-            <td>{{ container.status }}</td>
+            <td><span title="{{ container.status }}">{{ get_status_emoji(container.status) }}</span></td>
             <td><a href="{{ url_for('view_logs', container_id=container.id) }}">View Logs</a></td>
         </tr>
         {% endfor %}

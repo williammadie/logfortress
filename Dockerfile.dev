@@ -1,0 +1,29 @@
+# Use the official Python image.
+FROM python:3.13-slim-bookworm
+
+# Set environment variables to ensure that Python outputs everything to the terminal without buffering.
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Install system dependencies for uv and other development tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install uv for testing purposes
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+ENV PATH="/root/.local/bin/:$PATH"
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy dependency management files and install dependencies
+COPY pyproject.toml uv.lock /app/
+RUN uv sync
+
+# Expose the port your app runs on
+EXPOSE 2001
+
+# Command to start the application
+CMD ["uv", "run",  "python3", "main.py", "web"]

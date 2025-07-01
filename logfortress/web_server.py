@@ -1,6 +1,8 @@
 import docker
 from flask import Flask, render_template, Response
+from logfortress.docker_link import DockerLink
 from logfortress.docker_logs_manager import DockerLogsManager
+from logfortress.ui.utils import UserInterfaceUtils
 
 app = Flask(__name__)
 manager = DockerLogsManager()
@@ -32,7 +34,12 @@ def list_sources():
                 'log_file_path': path
             })
 
-    return render_template('list_sources.html', containers=containers, custom_sources=custom_sources)
+    return render_template(
+        'list_sources.html',
+        containers=containers,
+        custom_sources=custom_sources,
+        get_status_emoji=UserInterfaceUtils.get_status_emoji
+    )
 
 
 def generate_log_stream(container_id, is_custom, log_file_path=None):
@@ -88,9 +95,11 @@ def view_logs(container_id):
         container_id=container_id,
         container_name=container_name,
         container_status=container_status,
-        image_tag=image_tag,
         is_custom=is_custom,
-        log_file_path=log_file_path
+        log_file_path=log_file_path,
+        get_status_emoji=UserInterfaceUtils.get_status_emoji,
+        image_tag=image_tag,
+        image_url=DockerLink(image_tag).build_link()
     )
 
 

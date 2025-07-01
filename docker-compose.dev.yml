@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  logfortress:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: logfortress-dev
+    volumes:
+      - .:/app  # Mount the entire directory to allow for code changes
+      - /var/run/docker.sock:/var/run/docker.sock # For accessing Docker events
+    ports:
+      - "2001:2001"

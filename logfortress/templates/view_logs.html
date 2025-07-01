@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ container_name }} logs - LogFortress</title>
-    <link rel="icon" href="{{ url_for('static', filename='favicon2.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
         .container-info {
@@ -21,6 +21,46 @@
         .container-info div {
             margin: 0 10px;
         }
+        .pastable {
+            cursor: pointer;
+        }
+        /* Toast styling */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+        #toast.show {
+            visibility: visible;
+            -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @-webkit-keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @-webkit-keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
     </style>
     <script>
         function startLogStream() {
@@ -35,18 +75,43 @@
             };
         }
 
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                showToast("Copied to clipboard!");
+            }, function(err) {
+                showToast("Failed to copy. Try again.");
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
         window.onload = startLogStream;
     </script>
 </head>
 <body>
     <h1>{{ container_name }}</h1>
     <div class="container-info">
-        <div><strong>Name:</strong> {{ container_name }}</div>
-        <div><strong>ID:</strong> {{ container_id }}</div>
-        <div><strong>Status:</strong> {{ container_status }}</div>
-        <div><strong>Image:</strong> {{ image_tag }}</div>
+        <div class="pastable" onclick="copyToClipboard('{{ container_name }}')">
+            <strong>Name:</strong> <span>{{ container_name }}</span>
+        </div>
+        <div class="pastable" onclick="copyToClipboard('{{ container_id }}')">
+            <strong>ID:</strong> <span>{{ container_id }}</span>
+        </div>
+        <div><strong>Status:</strong> 
+            <span title="{{ container_status }}">{{ get_status_emoji(container_status) }}</span>
+        </div>
+        <div><strong>Image:</strong> <a target="_blank" href="{{ image_url }}">{{ image_tag }}</a>↗️</div>
     </div>
     <div id="log-container"></div>
     <button onclick="window.location.href='{{ url_for("list_sources") }}'">⬅️ Back to Listing</button>
+
+    <!-- Toast element -->
+    <div id="toast"></div>
 </body>
 </html>

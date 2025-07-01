@@ -1,6 +1,6 @@
 [project]
 name = "logfortress"
-version = "0.1.0"
+version = "0.0.1"
 description = "A simple debugging tool for Docker containers"
 readme = "README.md"
 requires-python = ">=3.7"

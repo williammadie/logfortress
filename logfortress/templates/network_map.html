@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Docker Network Map - LogFortress</title>
+        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+        <link rel="stylesheet" href="{{ url_for('static', filename='nav.css') }}">
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: calc(100% - 20px);
+            }
+            svg {
+                width: 100%;
+                height: calc(100% - 20px);
+            }
+            .node { stroke: #fff; stroke-width: 1.5px; }
+            .link { stroke: #999; stroke-opacity: .6; }
+            .label { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 10px;
+             }
+             #map-container {
+                height: 100%;
+             }
+        </style>
+    </head>
+    <body>
+        <nav>
+            <a href="/">Logs</a>
+            <a href="/network-map">Network Map</a>
+        </nav>
+        <div id="map-container">
+            <svg></svg>
+        </div>
+        <script src="https://d3js.org/d3.v6.min.js"></script>
+        <script>
+            const data = {{ networks|tojson }};
+            const nodes = [];
+            const links = [];
+
+            const containerColor = "blue";
+            const networkColor = "red";
+
+            // Create nodes and links
+            data.forEach(network => {
+                network.containers.forEach(container => {
+                    nodes.push({
+                        id: container.id,
+                        name: container.name,
+                        network: network.name,
+                        type: "container"
+                    });
+                });
+                // Add networks as nodes
+                nodes.push({
+                    id: network.id,
+                    name: network.name,
+                    type: "network"
+                });
+            });
+
+            data.forEach(network => {
+                network.containers.forEach(container => {
+                    links.push({
+                        source: network.id,
+                        target: container.id
+                    });
+                });
+            });
+
+            console.log('Nodes:', nodes);
+            console.log('Links:', links);
+
+            const svg = d3.select("svg"),
+                width = window.innerWidth,
+                height = window.innerHeight;
+
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 10])
+                .on("zoom", (event) => {
+                    svgGroup.attr("transform", event.transform);
+                });
+
+            svg.call(zoom);
+
+            const svgGroup = svg.append("g");
+
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-200))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+
+            const link = svgGroup.append("g")
+                .attr("class", "links")
+                .selectAll("line")
+                .data(links)
+                .enter().append("line")
+                .attr("class", "link")
+                .attr("stroke-width", 1);
+
+            const node = svgGroup.append("g")
+                .attr("class", "nodes")
+                .selectAll("circle")
+                .data(nodes)
+                .enter().append("circle")
+                .attr("r", 5)
+                .attr("fill", d => d.type === "container" ? containerColor : networkColor)
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            const labels = svgGroup.append("g")
+                .attr("class", "labels")
+                .selectAll("text")
+                .data(nodes)
+                .enter().append("text")
+                .attr("class", "label")
+                .attr("dy", "0.35em")
+                .attr("x", 8)  // Adjust x to appear next to the circle
+                .text(d => d.name);
+
+            simulation.on("tick", () => {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+
+                labels
+                    .attr("x", d => d.x + 8)  // Slight offset for better viewing
+                    .attr("y", d => d.y);
+            });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+
+        </script>
+    </body>
+</html>

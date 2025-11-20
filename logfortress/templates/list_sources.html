@@ -5,8 +5,13 @@
     <title>Log Sources - LogFortress</title>
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='nav.css') }}">
 </head>
 <body>
+    <nav>
+        <a href="/">Logs</a>
+        <a href="/network-map">Network Map</a>
+    </nav>
     <h1>LogFortress</h1>
     <h2>Running Containers</h2>
     <table>

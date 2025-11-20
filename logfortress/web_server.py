@@ -2,10 +2,12 @@ import docker
 from flask import Flask, render_template, Response
 from logfortress.docker_link import DockerLink
 from logfortress.docker_logs_manager import DockerLogsManager
+from logfortress.docker_network_manager import DockerNetworkManager
 from logfortress.ui.utils import UserInterfaceUtils
 
 app = Flask(__name__)
 manager = DockerLogsManager()
+network_manager = DockerNetworkManager()
 
 
 @app.route('/')
@@ -113,5 +115,13 @@ def stream_logs(container_id):
                     mimetype='text/event-stream')
 
 
+@app.route('/network-map')
+def map_docker_networks():
+    """ Render a map of Docker networks and their containers. """
+    docker_networks = network_manager.get_docker_networks()
+    return render_template('network_map.html', networks=docker_networks)
+
+
 def start_server():
+    """ Start the Flask web server. """
     app.run(host='0.0.0.0', port=2001, debug=True)
